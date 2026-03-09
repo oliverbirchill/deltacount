@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeltaCount</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --panel: #141923;
+      --panel-2: #171e2a;
+      --panel-3: #101620;
+      --border: rgba(158, 177, 204, 0.14);
+      --border-strong: rgba(158, 177, 204, 0.26);
+      --text: #e7edf7;
+      --muted: #8e9aae;
+      --accent: #5d8697;
+      --success: #6fcf97;
+      --warning: #d7a95b;
+      --error: #cf6f7d;
+      --shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+
+    body {
+      margin: 0;
+      font-family: "Inter", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top, rgba(93, 134, 151, 0.15), transparent 32%),
+        linear-gradient(180deg, #0d1016 0%, #0f1117 100%);
+    }
+
+    .app {
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 28px 20px 0;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .eyebrow {
+      margin: 0 0 6px;
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    button {
+      border: 1px solid var(--border);
+      background: var(--panel-2);
+      color: var(--text);
+      font: inherit;
+      border-radius: 12px;
+      height: 38px;
+      padding: 0 14px;
+      cursor: pointer;
+      transition: 140ms ease;
+    }
+
+    button:hover {
+      border-color: var(--border-strong);
+      transform: translateY(-1px);
+    }
+
+    .primary {
+      background: linear-gradient(180deg, #5b8394 0%, #4d7383 100%);
+      border-color: transparent;
+      color: #f8fbfd;
+      font-weight: 600;
+    }
+
+    .table-shell {
+      position: relative;
+      flex: 1;
+      min-height: 420px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.015), rgba(255, 255, 255, 0)), var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+    }
+
+    .table-shell.dragover {
+      border-color: rgba(120, 162, 179, 0.72);
+      box-shadow: 0 0 0 1px rgba(120, 162, 179, 0.18), 0 26px 70px rgba(0, 0, 0, 0.42);
+      background:
+        linear-gradient(180deg, rgba(120, 162, 179, 0.08), rgba(120, 162, 179, 0.03)),
+        var(--panel);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    thead th {
+      padding: 16px 18px;
+      text-align: left;
+      font-size: 0.72rem;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: var(--panel-3);
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+    }
+
+    thead th.count-col,
+    tbody td.count-col {
+      text-align: right;
+    }
+
+    tbody td {
+      padding: 15px 18px;
+      border-bottom: 1px solid rgba(158, 177, 204, 0.08);
+      font-size: 0.94rem;
+      vertical-align: middle;
+    }
+
+    tbody tr:nth-child(even) {
+      background: rgba(255, 255, 255, 0.015);
+    }
+
+    .filename {
+      font-weight: 500;
+      word-break: break-word;
+    }
+
+    .count-cell {
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .message {
+      color: var(--muted);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 78px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      border: 1px solid transparent;
+      white-space: nowrap;
+    }
+
+    .badge.success {
+      color: #dff7ea;
+      background: rgba(111, 207, 151, 0.14);
+      border-color: rgba(111, 207, 151, 0.18);
+    }
+
+    .badge.warning {
+      color: #f6e4c1;
+      background: rgba(215, 169, 91, 0.16);
+      border-color: rgba(215, 169, 91, 0.2);
+    }
+
+    .badge.error {
+      color: #f7d8de;
+      background: rgba(207, 111, 125, 0.15);
+      border-color: rgba(207, 111, 125, 0.2);
+    }
+
+    .placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+      cursor: pointer;
+    }
+
+    .placeholder[hidden] {
+      display: none;
+    }
+
+    .placeholder-inner {
+      max-width: 380px;
+      color: var(--muted);
+    }
+
+    .placeholder svg {
+      width: 34px;
+      height: 34px;
+      margin-bottom: 14px;
+      fill: none;
+      stroke: rgba(158, 177, 204, 0.55);
+      stroke-width: 1.6;
+    }
+
+    .placeholder strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #acb7ca;
+      font-weight: 500;
+    }
+
+    .status-bar {
+      margin-top: 16px;
+      padding: 16px 2px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      color: var(--muted);
+    }
+
+    .total {
+      color: var(--text);
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    @media (max-width: 760px) {
+      .app {
+        padding-inline: 14px;
+      }
+
+      .header,
+      .status-bar {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .toolbar {
+        justify-content: stretch;
+      }
+
+      .toolbar button {
+        flex: 1;
+      }
+
+      thead th:nth-child(4),
+      tbody td:nth-child(4) {
+        display: none;
+      }
+
+      .table-shell {
+        min-height: 360px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div>
+        <h1>DeltaCount</h1>
+        <p class="subtitle">Static browser app for counting track-changes in word documents.</p>
+      </div>
+    </header>
+
+    <div class="toolbar">
+      <button type="button" id="browseButton" class="primary">Browse Files</button>
+      <button type="button" id="clearButton">Clear</button>
+    </div>
+
+    <section class="table-shell" id="dropTarget" aria-label="Processed files">
+      <input id="fileInput" class="sr-only" type="file" accept=".docx" multiple>
+      <table>
+        <thead>
+          <tr>
+            <th>Filename</th>
+            <th class="count-col">Billable</th>
+            <th>Status</th>
+            <th>Message</th>
+          </tr>
+        </thead>
+        <tbody id="resultsBody"></tbody>
+      </table>
+
+      <div class="placeholder" id="placeholder" tabindex="0" role="button" aria-label="Drop .docx files here or click Browse">
+        <div class="placeholder-inner">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12 16V5m0 0 3.5 3.5M12 5 8.5 8.5"></path>
+            <path d="M5 15.5v1.75A1.75 1.75 0 0 0 6.75 19h10.5A1.75 1.75 0 0 0 19 17.25V15.5"></path>
+          </svg>
+          <strong>Drop .docx files here or click Browse</strong>
+          <span>Legacy .doc files are not supported in the browser.</span>
+        </div>
+      </div>
+    </section>
+
+    <footer class="status-bar">
+      <div class="total" id="totalLabel">Total billable word count: 0</div>
+      <div id="fileCountLabel">No files processed</div>
+    </footer>
+  </div>
+
+  <script>
+    const ABBREVIATIONS = new Set([
+      "e.g.", "i.e.", "dr.", "mr.", "mrs.", "ms.", "prof.", "sr.", "jr.", "vs.", "etc."
+    ]);
+    const WORD_RE = /[A-Za-z0-9]+(?:['-][A-Za-z0-9]+)*/g;
+    const WORD_CHAR_RE = /[A-Za-z0-9'-]/;
+    const WORD_DOCUMENT_XML = "word/document.xml";
+
+    const state = {
+      results: []
+    };
+
+    const elements = {
+      browseButton: document.getElementById("browseButton"),
+      clearButton: document.getElementById("clearButton"),
+      fileInput: document.getElementById("fileInput"),
+      dropTarget: document.getElementById("dropTarget"),
+      placeholder: document.getElementById("placeholder"),
+      resultsBody: document.getElementById("resultsBody"),
+      totalLabel: document.getElementById("totalLabel"),
+      fileCountLabel: document.getElementById("fileCountLabel")
+    };
+
+    elements.browseButton.addEventListener("click", () => elements.fileInput.click());
+    elements.placeholder.addEventListener("click", () => elements.fileInput.click());
+    elements.placeholder.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        elements.fileInput.click();
+      }
+    });
+    elements.clearButton.addEventListener("click", clearResults);
+    elements.fileInput.addEventListener("change", async (event) => {
+      const files = Array.from(event.target.files || []);
+      event.target.value = "";
+      await processFiles(files);
+    });
+
+    ["dragenter", "dragover"].forEach((type) => {
+      elements.dropTarget.addEventListener(type, (event) => {
+        event.preventDefault();
+        elements.dropTarget.classList.add("dragover");
+      });
+    });
+
+    ["dragleave", "dragend"].forEach((type) => {
+      elements.dropTarget.addEventListener(type, (event) => {
+        if (event.target === elements.dropTarget || !elements.dropTarget.contains(event.relatedTarget)) {
+          elements.dropTarget.classList.remove("dragover");
+        }
+      });
+    });
+
+    elements.dropTarget.addEventListener("drop", async (event) => {
+      event.preventDefault();
+      elements.dropTarget.classList.remove("dragover");
+      const files = Array.from(event.dataTransfer?.files || []);
+      await processFiles(files);
+    });
+
+    async function processFiles(files) {
+      for (const file of files) {
+        const lowerName = file.name.toLowerCase();
+
+        if (lowerName.endsWith(".doc")) {
+          addResult({
+            filename: file.name,
+            billableWords: 0,
+            status: "error",
+            message: "Legacy .doc files are not supported \u2014 please re-save as .docx in Word first."
+          });
+          continue;
+        }
+
+        if (!lowerName.endsWith(".docx")) {
+          addResult({
+            filename: file.name,
+            billableWords: 0,
+            status: "warning",
+            message: "Unsupported file type. Please use .docx files only."
+          });
+          continue;
+        }
+
+        try {
+          const result = await processDocx(file);
+          addResult(result);
+        } catch (error) {
+          addResult({
+            filename: file.name,
+            billableWords: 0,
+            status: "error",
+            message: error instanceof Error ? error.message : "Unexpected error."
+          });
+        }
+      }
+
+      renderSummary();
+    }
+
+    async function processDocx(file) {
+      const xmlDoc = await loadDocumentXml(file);
+      const paragraphs = extractParagraphs(xmlDoc);
+
+      if (paragraphs.length === 0) {
+        return {
+          filename: file.name,
+          billableWords: 0,
+          status: "warning",
+          message: "No paragraphs found in document."
+        };
+      }
+
+      if (!hasTrackedChanges(paragraphs)) {
+        return {
+          filename: file.name,
+          billableWords: 0,
+          status: "warning",
+          message: "No tracked changes found."
+        };
+      }
+
+      return {
+        filename: file.name,
+        billableWords: countBillableWords(paragraphs),
+        status: "success",
+        message: "Processed successfully."
+      };
+    }
+
+    async function loadDocumentXml(file) {
+      let zip;
+      try {
+        zip = await JSZip.loadAsync(await file.arrayBuffer());
+      } catch (error) {
+        throw new Error("Could not open .docx file.");
+      }
+
+      const entry = zip.file(WORD_DOCUMENT_XML);
+      if (!entry) {
+        throw new Error("Could not read word/document.xml from the .docx file.");
+      }
+
+      let xmlText;
+      try {
+        xmlText = await entry.async("string");
+      } catch (error) {
+        throw new Error("Could not extract document XML from the .docx file.");
+      }
+
+      const xmlDoc = new DOMParser().parseFromString(xmlText, "application/xml");
+      if (xmlDoc.querySelector("parsererror")) {
+        throw new Error("Invalid XML in document.");
+      }
+
+      return xmlDoc;
+    }
+
+    function extractParagraphs(xmlDoc) {
+      return Array.from(xmlDoc.getElementsByTagName("*")).filter((node) => node.localName === "p");
+    }
+
+    function hasTrackedChanges(paragraphs) {
+      return paragraphs.some((paragraph) => containsLocalName(paragraph, "ins") || containsLocalName(paragraph, "del"));
+    }
+
+    function containsLocalName(root, localName) {
+      if (root.localName === localName) {
+        return true;
+      }
+
+      for (const child of root.children) {
+        if (containsLocalName(child, localName)) {
+          return true;
+        }
+      }
+
+      return false;
+    }
+
+    function countBillableWords(paragraphs) {
+      return paragraphs.reduce((total, paragraph) => total + countBillableWordsInParagraph(paragraph), 0);
+    }
+
+    function countBillableWordsInParagraph(paragraph) {
+      const parts = Array.from(iterSentenceParts(paragraph));
+      const { text, kinds } = collectChars(parts);
+      const sentences = splitSentences(text, kinds);
+      let total = 0;
+
+      for (const [sentenceText, sentenceKinds] of sentences) {
+        const info = sentenceInfo(sentenceText, sentenceKinds);
+        const changed = info.hasInsertion || info.hasDeletion;
+        if (!changed) {
+          continue;
+        }
+
+        const wholeSentenceDeletion = info.hasDeletedWord && !info.hasInsertedWord && !info.hasNormalWord;
+        if (wholeSentenceDeletion) {
+          continue;
+        }
+
+        total += info.wordCount;
+      }
+
+      return total;
+    }
+
+    function* iterSentenceParts(node, kind = "normal") {
+      if (node.nodeType !== Node.ELEMENT_NODE) {
+        return;
+      }
+
+      const tag = node.localName;
+      let nextKind = kind;
+      if (tag === "ins") {
+        nextKind = "ins";
+      } else if (tag === "del") {
+        nextKind = "del";
+      }
+
+      if (tag === "t" || tag === "delText") {
+        const text = node.textContent || "";
+        if (text) {
+          yield {
+            text,
+            kind: tag === "delText" ? "del" : nextKind
+          };
+        }
+        return;
+      }
+
+      if (tag === "tab" || tag === "br" || tag === "cr") {
+        yield { text: " ", kind: nextKind };
+        return;
+      }
+
+      for (const child of node.children) {
+        yield* iterSentenceParts(child, nextKind);
+      }
+    }
+
+    function collectChars(parts) {
+      const textChars = [];
+      const kinds = [];
+
+      for (const part of parts) {
+        for (const ch of part.text) {
+          textChars.push(ch);
+          kinds.push(part.kind);
+        }
+      }
+
+      return {
+        text: textChars.join(""),
+        kinds
+      };
+    }
+
+    function isAbbreviation(text, idx) {
+      const before = text.slice(0, idx + 1);
+      const match = before.match(/([A-Za-z.]+)\.$/);
+      if (!match) {
+        return false;
+      }
+
+      const token = match[1].toLowerCase() + ".";
+      if (ABBREVIATIONS.has(token)) {
+        return true;
+      }
+
+      return /^(?:[A-Za-z]\.){2,}$/.test(token);
+    }
+
+    function isSentenceBoundary(text, idx) {
+      const ch = text[idx];
+      if (!".!?".includes(ch)) {
+        return false;
+      }
+
+      if (ch === "." && isAbbreviation(text, idx)) {
+        return false;
+      }
+
+      let j = idx + 1;
+      while (j < text.length && "\"')]}`".includes(text[j])) {
+        j += 1;
+      }
+      while (j < text.length && /\s/.test(text[j])) {
+        j += 1;
+      }
+
+      if (j >= text.length) {
+        return true;
+      }
+
+      return /[A-Z0-9]/.test(text[j]);
+    }
+
+    function splitSentences(text, kinds) {
+      if (!text.trim()) {
+        return [];
+      }
+
+      const sentences = [];
+      let start = 0;
+
+      for (let i = 0; i < text.length; i += 1) {
+        if (isSentenceBoundary(text, i)) {
+          const chunk = text.slice(start, i + 1);
+          const chunkKinds = kinds.slice(start, i + 1);
+          if (chunk.trim()) {
+            sentences.push([chunk, chunkKinds]);
+          }
+          start = i + 1;
+        }
+      }
+
+      if (start < text.length) {
+        const tail = text.slice(start);
+        const tailKinds = kinds.slice(start);
+        if (tail.trim()) {
+          sentences.push([tail, tailKinds]);
+        }
+      }
+
+      return sentences;
+    }
+
+    function sentenceInfo(sentenceText, sentenceKinds) {
+      let hasInsertion = false;
+      let hasDeletion = false;
+      let hasNormalWord = false;
+      let hasInsertedWord = false;
+      let hasDeletedWord = false;
+      let currentWordKinds = [];
+
+      function flushWord() {
+        if (currentWordKinds.length === 0) {
+          return;
+        }
+
+        const kindSet = new Set(currentWordKinds);
+        if (kindSet.has("normal")) {
+          hasNormalWord = true;
+        }
+        if (kindSet.has("ins")) {
+          hasInsertedWord = true;
+        }
+        if (kindSet.has("del")) {
+          hasDeletedWord = true;
+        }
+        currentWordKinds = [];
+      }
+
+      for (let i = 0; i < sentenceText.length; i += 1) {
+        const ch = sentenceText[i];
+        const kind = sentenceKinds[i];
+
+        if (kind === "ins") {
+          hasInsertion = true;
+        }
+        if (kind === "del") {
+          hasDeletion = true;
+        }
+
+        if (WORD_CHAR_RE.test(ch)) {
+          currentWordKinds.push(kind);
+        } else {
+          flushWord();
+        }
+      }
+
+      flushWord();
+
+      const matches = sentenceText.match(WORD_RE);
+      return {
+        text: sentenceText,
+        hasInsertion,
+        hasDeletion,
+        hasNormalWord,
+        hasInsertedWord,
+        hasDeletedWord,
+        wordCount: matches ? matches.length : 0
+      };
+    }
+
+    function addResult(result) {
+      state.results.push(result);
+      renderRow(result);
+      updatePlaceholder();
+    }
+
+    function renderRow(result) {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td class="filename"></td>
+        <td class="count-col count-cell"></td>
+        <td></td>
+        <td class="message"></td>
+      `;
+
+      row.children[0].textContent = result.filename;
+      row.children[1].textContent = result.billableWords.toLocaleString();
+      row.children[2].innerHTML = `<span class="badge ${result.status}">${capitalize(result.status)}</span>`;
+      row.children[3].textContent = result.message;
+      elements.resultsBody.appendChild(row);
+    }
+
+    function renderSummary() {
+      const total = state.results
+        .filter((result) => result.status === "success")
+        .reduce((sum, result) => sum + result.billableWords, 0);
+
+      const successCount = state.results.filter((result) => result.status === "success").length;
+      const totalCount = state.results.length;
+
+      elements.totalLabel.textContent = `Total billable word count: ${total.toLocaleString()}`;
+      elements.fileCountLabel.textContent = totalCount === 0
+        ? "No files processed"
+        : `${successCount} of ${totalCount} ${totalCount === 1 ? "file" : "files"} processed successfully`;
+    }
+
+    function clearResults() {
+      state.results = [];
+      elements.resultsBody.textContent = "";
+      renderSummary();
+      updatePlaceholder();
+    }
+
+    function updatePlaceholder() {
+      elements.placeholder.hidden = state.results.length > 0;
+    }
+
+    function capitalize(value) {
+      return value.charAt(0).toUpperCase() + value.slice(1);
+    }
+
+    updatePlaceholder();
+    renderSummary();
+
+    window.DeltaCountLogic = {
+      countBillableWordsInParagraph,
+      splitSentences,
+      sentenceInfo,
+      isSentenceBoundary,
+      isAbbreviation,
+      extractParagraphs,
+      hasTrackedChanges
+    };
+  </script>
+</body>
+</html>
