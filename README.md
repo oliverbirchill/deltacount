@@ -33,8 +33,8 @@ Legacy .doc files must be re-saved as .docx in Word before they can be used here
 
 ## How To Use
 
-1. Open `index.html` in a browser, or visit the GitHub Pages site.
-2. Drop one or more `.docx` files onto the table area, or click **Browse Files**.
+1. Open index.html in a browser, or visit the GitHub Pages site.
+2. Drop one or more .docx files onto the table area, or click **Browse Files**.
 3. Review the billable count, status, and message for each file.
 4. Read the total billable word count in the status bar at the bottom.
 5. Click **Clear** to remove the current batch.
@@ -42,5 +42,5 @@ Legacy .doc files must be re-saved as .docx in Word before they can be used here
 ## Technical Notes
 
 - The app is a single static index.html file.
-- It uses CDN-hosted JSZip to unzip .doc` files in the browser.
+- It uses CDN-hosted JSZip to unzip .doc files in the browser.
 
