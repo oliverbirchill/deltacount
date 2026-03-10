@@ -683,6 +683,7 @@
       let hasInsertedWord = false;
       let hasDeletedWord = false;
       let currentWordKinds = [];
+      let visibleText = "";
 
       function flushWord() {
         if (currentWordKinds.length === 0) {
@@ -711,6 +712,8 @@
         }
         if (kind === "del") {
           hasDeletion = true;
+        } else {
+          visibleText += ch;
         }
 
         if (WORD_CHAR_RE.test(ch)) {
@@ -722,7 +725,7 @@
 
       flushWord();
 
-      const matches = sentenceText.match(WORD_RE);
+      const matches = visibleText.match(WORD_RE);
       return {
         text: sentenceText,
         hasInsertion,
@@ -730,6 +733,7 @@
         hasNormalWord,
         hasInsertedWord,
         hasDeletedWord,
+        visibleText,
         wordCount: matches ? matches.length : 0
       };
     }
@@ -800,4 +804,8 @@
   </script>
 </body>
 </html>
+
+
+
+
 
