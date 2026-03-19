@@ -1,6 +1,6 @@
 # DeltaCount
 
-DeltaCount is a browser-based tool for translation teams to quickly calculate billable word counts for projects involving the translation of word files containing track-changes. 
+DeltaCount is a browser-based tool for translation teams to quickly calculate billable word counts for translation of changes projects.
 
 Live site: https://oliverbirchill.github.io/deltacount
 
@@ -23,11 +23,6 @@ DeltaCount uses these rules:
 5. If a sentence contains multiple tracked changes, it is still only counted once.
 
 Sentence boundaries are detected with punctuation-aware logic and common abbreviation handling, including cases such as "e.g.", "i.e.", "Dr.", and "Mr." to avoid false sentence splits.
-
-## File Support
-
-- Supported: .docx
-- Not supported: .doc
 
 Legacy .doc files must be re-saved as .docx in Word before they can be used here.
 
