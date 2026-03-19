@@ -4,26 +4,27 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DeltaCount</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <style>
     :root {
-      --bg: #0f1117;
-      --panel: #141923;
-      --panel-2: #171e2a;
-      --panel-3: #101620;
-      --border: rgba(158, 177, 204, 0.14);
-      --border-strong: rgba(158, 177, 204, 0.26);
-      --text: #e7edf7;
-      --muted: #8e9aae;
-      --accent: #5d8697;
-      --success: #6fcf97;
-      --warning: #d7a95b;
-      --error: #cf6f7d;
-      --shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
-      --radius: 18px;
+      --bg: #f9fafb;
+      --surface: #ffffff;
+      --border: #e5e7eb;
+      --border-strong: #d1d5db;
+      --text: #111827;
+      --muted: #6b7280;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --success: #15803d;
+      --success-bg: #f0fdf4;
+      --success-border: #bbf7d0;
+      --warning: #b45309;
+      --warning-bg: #fffbeb;
+      --warning-border: #fde68a;
+      --error: #b91c1c;
+      --error-bg: #fef2f2;
+      --error-border: #fecaca;
+      --shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     }
 
     * { box-sizing: border-box; }
@@ -31,11 +32,10 @@
 
     body {
       margin: 0;
-      font-family: "Inter", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 14px;
       color: var(--text);
-      background:
-        radial-gradient(circle at top, rgba(93, 134, 151, 0.15), transparent 32%),
-        linear-gradient(180deg, #0d1016 0%, #0f1117 100%);
+      background: var(--bg);
     }
 
     .app {
@@ -44,87 +44,78 @@
       flex-direction: column;
       max-width: 1160px;
       margin: 0 auto;
-      padding: 28px 20px 0;
+      padding: 24px 20px;
     }
 
     .header {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
+      align-items: center;
       gap: 16px;
-      margin-bottom: 18px;
-    }
-
-    .eyebrow {
-      margin: 0 0 6px;
-      font-size: 0.78rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--muted);
+      margin-bottom: 20px;
     }
 
     h1 {
       margin: 0;
-      font-size: 1.25rem;
+      font-size: 1.125rem;
       font-weight: 600;
-      letter-spacing: -0.02em;
-    }
-
-    .subtitle {
-      margin: 6px 0 0;
-      color: var(--muted);
-      font-size: 0.95rem;
+      color: var(--text);
     }
 
     .toolbar {
       display: flex;
       justify-content: flex-end;
-      gap: 10px;
-      margin-bottom: 14px;
+      gap: 8px;
+      margin-bottom: 12px;
     }
 
     button {
-      border: 1px solid var(--border);
-      background: var(--panel-2);
-      color: var(--text);
       font: inherit;
-      border-radius: 12px;
-      height: 38px;
+      font-size: 14px;
+      border-radius: 6px;
+      height: 36px;
       padding: 0 14px;
       cursor: pointer;
-      transition: 140ms ease;
-    }
-
-    button:hover {
-      border-color: var(--border-strong);
-      transform: translateY(-1px);
+      transition: background 120ms ease, border-color 120ms ease;
     }
 
     .primary {
-      background: linear-gradient(180deg, #5b8394 0%, #4d7383 100%);
-      border-color: transparent;
-      color: #f8fbfd;
-      font-weight: 600;
+      background: var(--primary);
+      border: 1px solid var(--primary);
+      color: #ffffff;
+      font-weight: 500;
+    }
+
+    .primary:hover {
+      background: var(--primary-hover);
+      border-color: var(--primary-hover);
+    }
+
+    .secondary {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .secondary:hover {
+      border-color: var(--border-strong);
+      background: #f9fafb;
     }
 
     .table-shell {
       position: relative;
       flex: 1;
-      min-height: 420px;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.015), rgba(255, 255, 255, 0)), var(--panel);
+      min-height: 160px;
+      background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
+      border-radius: 8px;
       box-shadow: var(--shadow);
       overflow: hidden;
-      transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+      transition: border-color 160ms ease;
     }
 
     .table-shell.dragover {
-      border-color: rgba(120, 162, 179, 0.72);
-      box-shadow: 0 0 0 1px rgba(120, 162, 179, 0.18), 0 26px 70px rgba(0, 0, 0, 0.42);
-      background:
-        linear-gradient(180deg, rgba(120, 162, 179, 0.08), rgba(120, 162, 179, 0.03)),
-        var(--panel);
+      border-color: var(--primary);
     }
 
     table {
@@ -133,15 +124,13 @@
     }
 
     thead th {
-      padding: 16px 18px;
+      padding: 10px 16px;
       text-align: left;
-      font-size: 0.72rem;
-      letter-spacing: 0.09em;
-      text-transform: uppercase;
+      font-size: 13px;
+      font-weight: 500;
       color: var(--muted);
-      background: var(--panel-3);
+      background: #f9fafb;
       border-bottom: 1px solid var(--border);
-      font-weight: 600;
     }
 
     thead th.count-col,
@@ -150,14 +139,18 @@
     }
 
     tbody td {
-      padding: 15px 18px;
-      border-bottom: 1px solid rgba(158, 177, 204, 0.08);
-      font-size: 0.94rem;
+      padding: 11px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
       vertical-align: middle;
     }
 
-    tbody tr:nth-child(even) {
-      background: rgba(255, 255, 255, 0.015);
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background: #f9fafb;
     }
 
     .filename {
@@ -166,8 +159,8 @@
     }
 
     .count-cell {
-      font-weight: 600;
-      letter-spacing: -0.01em;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
     }
 
     .message {
@@ -178,32 +171,31 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-width: 78px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      font-size: 0.76rem;
-      font-weight: 600;
-      letter-spacing: 0.02em;
+      min-width: 66px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
       border: 1px solid transparent;
       white-space: nowrap;
     }
 
     .badge.success {
-      color: #dff7ea;
-      background: rgba(111, 207, 151, 0.14);
-      border-color: rgba(111, 207, 151, 0.18);
+      color: var(--success);
+      background: var(--success-bg);
+      border-color: var(--success-border);
     }
 
     .badge.warning {
-      color: #f6e4c1;
-      background: rgba(215, 169, 91, 0.16);
-      border-color: rgba(215, 169, 91, 0.2);
+      color: var(--warning);
+      background: var(--warning-bg);
+      border-color: var(--warning-border);
     }
 
     .badge.error {
-      color: #f7d8de;
-      background: rgba(207, 111, 125, 0.15);
-      border-color: rgba(207, 111, 125, 0.2);
+      color: var(--error);
+      background: var(--error-bg);
+      border-color: var(--error-border);
     }
 
     .placeholder {
@@ -222,41 +214,49 @@
     }
 
     .placeholder-inner {
-      max-width: 380px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
       color: var(--muted);
     }
 
     .placeholder svg {
-      width: 34px;
-      height: 34px;
-      margin-bottom: 14px;
+      width: 24px;
+      height: 24px;
+      margin-bottom: 4px;
       fill: none;
-      stroke: rgba(158, 177, 204, 0.55);
-      stroke-width: 1.6;
+      stroke: var(--border-strong);
+      stroke-width: 1.5;
     }
 
     .placeholder strong {
-      display: block;
-      margin-bottom: 6px;
-      color: #acb7ca;
+      font-size: 14px;
       font-weight: 500;
+      color: var(--text);
+    }
+
+    .placeholder span {
+      font-size: 13px;
     }
 
     .status-bar {
-      margin-top: 16px;
-      padding: 16px 2px 20px;
-      border-top: 1px solid var(--border);
+      margin-top: 12px;
+      padding: 11px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 12px;
       color: var(--muted);
+      font-size: 14px;
     }
 
     .total {
       color: var(--text);
-      font-weight: 600;
-      letter-spacing: -0.01em;
+      font-weight: 500;
     }
 
     .sr-only {
@@ -294,10 +294,6 @@
       tbody td:nth-child(4) {
         display: none;
       }
-
-      .table-shell {
-        min-height: 360px;
-      }
     }
   </style>
 </head>
@@ -311,7 +307,7 @@
 
     <div class="toolbar">
       <button type="button" id="browseButton" class="primary">Browse Files</button>
-      <button type="button" id="clearButton">Clear</button>
+      <button type="button" id="clearButton" class="secondary">Clear</button>
     </div>
 
     <section class="table-shell" id="dropTarget" aria-label="Processed files">
