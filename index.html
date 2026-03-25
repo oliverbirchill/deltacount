@@ -6,24 +6,37 @@
   <title>DeltaCount</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #0f1117;
-      --panel: #141923;
-      --panel-2: #171e2a;
-      --panel-3: #101620;
-      --border: rgba(158, 177, 204, 0.14);
-      --border-strong: rgba(158, 177, 204, 0.26);
-      --text: #e7edf7;
-      --muted: #8e9aae;
-      --accent: #5d8697;
-      --success: #6fcf97;
-      --warning: #d7a95b;
-      --error: #cf6f7d;
-      --shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
-      --radius: 18px;
+      --bg: #f9fafb;
+      --surface: #ffffff;
+      --border: #e5e7eb;
+      --border-strong: #d1d5db;
+      --text: #111827;
+      --muted: #6b7280;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --text-on-primary: #ffffff;
+      --success: #15803d;
+      --success-bg: #f0fdf4;
+      --success-border: #bbf7d0;
+      --warning: #b45309;
+      --warning-bg: #fffbeb;
+      --warning-border: #fde68a;
+      --error: #b91c1c;
+      --error-bg: #fef2f2;
+      --error-border: #fecaca;
+      --shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      --radius-sm: 4px;
+      --radius: 6px;
+      --radius-lg: 8px;
+      --font-system: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --font-body: 'Plus Jakarta Sans', var(--font-system);
+      --text-xs: 0.75rem;
+      --text-sm: 0.8125rem;
+      --text-base: 0.875rem;
+      --text-lg: 1.25rem;
     }
 
     * { box-sizing: border-box; }
@@ -31,11 +44,11 @@
 
     body {
       margin: 0;
-      font-family: "Inter", sans-serif;
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      line-height: 1.5;
       color: var(--text);
-      background:
-        radial-gradient(circle at top, rgba(93, 134, 151, 0.15), transparent 32%),
-        linear-gradient(180deg, #0d1016 0%, #0f1117 100%);
+      background: var(--bg);
     }
 
     .app {
@@ -44,87 +57,100 @@
       flex-direction: column;
       max-width: 1160px;
       margin: 0 auto;
-      padding: 28px 20px 0;
+      padding: 24px 20px;
     }
 
     .header {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
+      align-items: center;
       gap: 16px;
-      margin-bottom: 18px;
-    }
-
-    .eyebrow {
-      margin: 0 0 6px;
-      font-size: 0.78rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--muted);
+      margin-bottom: 20px;
     }
 
     h1 {
       margin: 0;
-      font-size: 1.25rem;
+      font-size: var(--text-lg);
       font-weight: 600;
-      letter-spacing: -0.02em;
-    }
-
-    .subtitle {
-      margin: 6px 0 0;
-      color: var(--muted);
-      font-size: 0.95rem;
+      letter-spacing: -0.015em;
+      line-height: 1.2;
+      color: var(--text);
     }
 
     .toolbar {
       display: flex;
       justify-content: flex-end;
-      gap: 10px;
-      margin-bottom: 14px;
+      gap: 8px;
+      margin-bottom: 12px;
     }
 
     button {
-      border: 1px solid var(--border);
-      background: var(--panel-2);
-      color: var(--text);
       font: inherit;
-      border-radius: 12px;
-      height: 38px;
-      padding: 0 14px;
+      font-size: var(--text-base);
+      border-radius: var(--radius);
+      height: 44px;
+      padding: 0 16px;
       cursor: pointer;
-      transition: 140ms ease;
+      transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
     }
 
-    button:hover {
-      border-color: var(--border-strong);
-      transform: translateY(-1px);
+    button:focus-visible,
+    [role="button"]:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
     }
 
     .primary {
-      background: linear-gradient(180deg, #5b8394 0%, #4d7383 100%);
-      border-color: transparent;
-      color: #f8fbfd;
-      font-weight: 600;
+      background: var(--primary);
+      border: 1px solid var(--primary);
+      color: var(--text-on-primary);
+      font-weight: 500;
+    }
+
+    .primary:hover {
+      background: var(--primary-hover);
+      border-color: var(--primary-hover);
+    }
+
+    .primary:active {
+      filter: brightness(0.93);
+    }
+
+    .secondary {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .secondary:hover {
+      border-color: var(--border-strong);
+      background: var(--bg);
+    }
+
+    .secondary:active {
+      background: var(--border);
+      border-color: var(--border-strong);
     }
 
     .table-shell {
       position: relative;
       flex: 1;
-      min-height: 420px;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.015), rgba(255, 255, 255, 0)), var(--panel);
+      min-height: 160px;
+      background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: var(--radius);
+      border-radius: var(--radius-lg);
       box-shadow: var(--shadow);
       overflow: hidden;
-      transition: border-color 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+      transition: border-color 160ms ease;
     }
 
     .table-shell.dragover {
-      border-color: rgba(120, 162, 179, 0.72);
-      box-shadow: 0 0 0 1px rgba(120, 162, 179, 0.18), 0 26px 70px rgba(0, 0, 0, 0.42);
-      background:
-        linear-gradient(180deg, rgba(120, 162, 179, 0.08), rgba(120, 162, 179, 0.03)),
-        var(--panel);
+      border-color: var(--primary);
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     table {
@@ -133,31 +159,40 @@
     }
 
     thead th {
-      padding: 16px 18px;
+      padding: 10px 16px;
       text-align: left;
-      font-size: 0.72rem;
-      letter-spacing: 0.09em;
-      text-transform: uppercase;
+      font-size: var(--text-sm);
+      font-weight: 500;
+      letter-spacing: 0.025em;
       color: var(--muted);
-      background: var(--panel-3);
+      background: var(--bg);
       border-bottom: 1px solid var(--border);
-      font-weight: 600;
     }
 
     thead th.count-col,
     tbody td.count-col {
       text-align: right;
+      white-space: nowrap;
+    }
+
+    thead th:nth-child(3),
+    tbody td:nth-child(3) {
+      white-space: nowrap;
     }
 
     tbody td {
-      padding: 15px 18px;
-      border-bottom: 1px solid rgba(158, 177, 204, 0.08);
-      font-size: 0.94rem;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: var(--text-base);
       vertical-align: middle;
     }
 
-    tbody tr:nth-child(even) {
-      background: rgba(255, 255, 255, 0.015);
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background: var(--bg);
     }
 
     .filename {
@@ -166,8 +201,8 @@
     }
 
     .count-cell {
-      font-weight: 600;
-      letter-spacing: -0.01em;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
     }
 
     .message {
@@ -178,37 +213,37 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-width: 78px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      font-size: 0.76rem;
-      font-weight: 600;
-      letter-spacing: 0.02em;
+      min-width: 66px;
+      padding: 3px 8px;
+      border-radius: var(--radius-sm);
+      font-size: var(--text-xs);
+      font-weight: 500;
       border: 1px solid transparent;
       white-space: nowrap;
     }
 
     .badge.success {
-      color: #dff7ea;
-      background: rgba(111, 207, 151, 0.14);
-      border-color: rgba(111, 207, 151, 0.18);
+      color: var(--success);
+      background: var(--success-bg);
+      border-color: var(--success-border);
     }
 
     .badge.warning {
-      color: #f6e4c1;
-      background: rgba(215, 169, 91, 0.16);
-      border-color: rgba(215, 169, 91, 0.2);
+      color: var(--warning);
+      background: var(--warning-bg);
+      border-color: var(--warning-border);
     }
 
     .badge.error {
-      color: #f7d8de;
-      background: rgba(207, 111, 125, 0.15);
-      border-color: rgba(207, 111, 125, 0.2);
+      color: var(--error);
+      background: var(--error-bg);
+      border-color: var(--error-border);
     }
 
     .placeholder {
       position: absolute;
       inset: 0;
+      border-radius: var(--radius-lg);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -222,41 +257,53 @@
     }
 
     .placeholder-inner {
-      max-width: 380px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
       color: var(--muted);
     }
 
     .placeholder svg {
-      width: 34px;
-      height: 34px;
-      margin-bottom: 14px;
+      width: 24px;
+      height: 24px;
+      margin-bottom: 4px;
       fill: none;
-      stroke: rgba(158, 177, 204, 0.55);
-      stroke-width: 1.6;
+      stroke: var(--border-strong);
+      stroke-width: 1.5;
     }
 
     .placeholder strong {
-      display: block;
-      margin-bottom: 6px;
-      color: #acb7ca;
+      font-size: var(--text-base);
       font-weight: 500;
+      color: var(--text);
+    }
+
+    .hint-mobile {
+      display: none;
+    }
+
+    .placeholder span {
+      font-size: var(--text-sm);
     }
 
     .status-bar {
-      margin-top: 16px;
-      padding: 16px 2px 20px;
-      border-top: 1px solid var(--border);
+      margin-top: 12px;
+      padding: 10px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 12px;
       color: var(--muted);
+      font-size: var(--text-base);
     }
 
     .total {
       color: var(--text);
-      font-weight: 600;
-      letter-spacing: -0.01em;
+      font-weight: 500;
     }
 
     .sr-only {
@@ -271,6 +318,18 @@
       border: 0;
     }
 
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+      }
+    }
+
     @media (max-width: 760px) {
       .app {
         padding-inline: 14px;
@@ -282,10 +341,6 @@
         align-items: flex-start;
       }
 
-      .toolbar {
-        justify-content: stretch;
-      }
-
       .toolbar button {
         flex: 1;
       }
@@ -295,8 +350,12 @@
         display: none;
       }
 
-      .table-shell {
-        min-height: 360px;
+      .hint-desktop {
+        display: none;
+      }
+
+      .hint-mobile {
+        display: block;
       }
     }
   </style>
@@ -304,29 +363,30 @@
 <body>
   <div class="app">
     <header class="header">
-      <div>
-        <h1>DeltaCount</h1>
-      </div>
+      <h1>DeltaCount</h1>
     </header>
 
     <div class="toolbar">
       <button type="button" id="browseButton" class="primary">Browse Files</button>
-      <button type="button" id="clearButton">Clear</button>
+      <button type="button" id="clearButton" class="secondary">Clear</button>
     </div>
 
     <section class="table-shell" id="dropTarget" aria-label="Processed files">
       <input id="fileInput" class="sr-only" type="file" accept=".docx" multiple>
-      <table>
-        <thead>
-          <tr>
-            <th>Filename</th>
-            <th class="count-col">Word count</th>
-            <th>Status</th>
-            <th>Message</th>
-          </tr>
-        </thead>
-        <tbody id="resultsBody"></tbody>
-      </table>
+      <div class="table-scroll">
+        <table>
+          <caption class="sr-only">Processed files</caption>
+          <thead>
+            <tr>
+              <th>Filename</th>
+              <th class="count-col">Word count</th>
+              <th>Status</th>
+              <th>Message</th>
+            </tr>
+          </thead>
+          <tbody id="resultsBody"></tbody>
+        </table>
+      </div>
 
       <div class="placeholder" id="placeholder" tabindex="0" role="button" aria-label="Drop .docx files here or click Browse">
         <div class="placeholder-inner">
@@ -334,18 +394,22 @@
             <path d="M12 16V5m0 0 3.5 3.5M12 5 8.5 8.5"></path>
             <path d="M5 15.5v1.75A1.75 1.75 0 0 0 6.75 19h10.5A1.75 1.75 0 0 0 19 17.25V15.5"></path>
           </svg>
-          <strong>Drop .docx files here or click Browse</strong>
+          <strong class="hint-desktop">Drop .docx files here or click Browse</strong>
+          <strong class="hint-mobile">Tap Browse Files to add .docx files</strong>
           <span>.doc files are not supported. Save these as .docx before importing.</span>
         </div>
       </div>
     </section>
 
     <footer class="status-bar">
-      <div class="total" id="totalLabel">Total billable word count: 0</div>
-      <div id="fileCountLabel">No files processed</div>
+      <div class="total" id="totalLabel" aria-live="polite" aria-atomic="true">Total billable word count: 0</div>
+      <div id="fileCountLabel" aria-live="polite" aria-atomic="true">No files processed</div>
     </footer>
+
+    <div class="sr-only" aria-live="polite" aria-atomic="true" id="announcer"></div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <script>
     const ABBREVIATIONS = new Set([
       "e.g.", "i.e.", "dr.", "mr.", "mrs.", "ms.", "prof.", "sr.", "jr.", "vs.", "etc."
@@ -367,7 +431,8 @@
       placeholder: document.getElementById("placeholder"),
       resultsBody: document.getElementById("resultsBody"),
       totalLabel: document.getElementById("totalLabel"),
-      fileCountLabel: document.getElementById("fileCountLabel")
+      fileCountLabel: document.getElementById("fileCountLabel"),
+      announcer: document.getElementById("announcer")
     };
 
     elements.browseButton.addEventListener("click", () => elements.fileInput.click());
@@ -408,6 +473,9 @@
     });
 
     async function processFiles(files) {
+      elements.browseButton.disabled = true;
+      elements.clearButton.disabled = true;
+
       for (const file of files) {
         const lowerName = file.name.toLowerCase();
 
@@ -444,6 +512,8 @@
         }
       }
 
+      elements.browseButton.disabled = false;
+      elements.clearButton.disabled = false;
       renderSummary();
     }
 
@@ -742,6 +812,12 @@
       state.results.push(result);
       renderRow(result);
       updatePlaceholder();
+
+      const summary = result.status === "success"
+        ? `${result.filename}: ${result.billableWords.toLocaleString()} billable words.`
+        : `${result.filename}: ${result.message}`;
+      elements.announcer.textContent = "";
+      requestAnimationFrame(() => { elements.announcer.textContent = summary; });
     }
 
     function renderRow(result) {
@@ -782,7 +858,9 @@
     }
 
     function updatePlaceholder() {
-      elements.placeholder.hidden = state.results.length > 0;
+      const hasResults = state.results.length > 0;
+      elements.placeholder.hidden = hasResults;
+      elements.clearButton.disabled = !hasResults;
     }
 
     function capitalize(value) {
@@ -804,8 +882,3 @@
   </script>
 </body>
 </html>
-
-
-
-
-
