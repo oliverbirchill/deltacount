@@ -4,7 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DeltaCount</title>
-  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #f9fafb;
@@ -15,6 +17,7 @@
       --muted: #6b7280;
       --primary: #2563eb;
       --primary-hover: #1d4ed8;
+      --text-on-primary: #ffffff;
       --success: #15803d;
       --success-bg: #f0fdf4;
       --success-border: #bbf7d0;
@@ -25,6 +28,15 @@
       --error-bg: #fef2f2;
       --error-border: #fecaca;
       --shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      --radius-sm: 4px;
+      --radius: 6px;
+      --radius-lg: 8px;
+      --font-system: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      --font-body: 'Plus Jakarta Sans', var(--font-system);
+      --text-xs: 0.75rem;
+      --text-sm: 0.8125rem;
+      --text-base: 0.875rem;
+      --text-lg: 1.25rem;
     }
 
     * { box-sizing: border-box; }
@@ -32,8 +44,9 @@
 
     body {
       margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      font-size: 14px;
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      line-height: 1.5;
       color: var(--text);
       background: var(--bg);
     }
@@ -57,8 +70,10 @@
 
     h1 {
       margin: 0;
-      font-size: 1.125rem;
+      font-size: var(--text-lg);
       font-weight: 600;
+      letter-spacing: -0.015em;
+      line-height: 1.2;
       color: var(--text);
     }
 
@@ -71,24 +86,34 @@
 
     button {
       font: inherit;
-      font-size: 14px;
-      border-radius: 6px;
-      height: 36px;
-      padding: 0 14px;
+      font-size: var(--text-base);
+      border-radius: var(--radius);
+      height: 44px;
+      padding: 0 16px;
       cursor: pointer;
-      transition: background 120ms ease, border-color 120ms ease;
+      transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+    }
+
+    button:focus-visible,
+    [role="button"]:focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
     }
 
     .primary {
       background: var(--primary);
       border: 1px solid var(--primary);
-      color: #ffffff;
+      color: var(--text-on-primary);
       font-weight: 500;
     }
 
     .primary:hover {
       background: var(--primary-hover);
       border-color: var(--primary-hover);
+    }
+
+    .primary:active {
+      filter: brightness(0.93);
     }
 
     .secondary {
@@ -99,7 +124,12 @@
 
     .secondary:hover {
       border-color: var(--border-strong);
-      background: #f9fafb;
+      background: var(--bg);
+    }
+
+    .secondary:active {
+      background: var(--border);
+      border-color: var(--border-strong);
     }
 
     .table-shell {
@@ -108,7 +138,7 @@
       min-height: 160px;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 8px;
+      border-radius: var(--radius-lg);
       box-shadow: var(--shadow);
       overflow: hidden;
       transition: border-color 160ms ease;
@@ -116,6 +146,11 @@
 
     .table-shell.dragover {
       border-color: var(--primary);
+    }
+
+    .table-scroll {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     table {
@@ -126,22 +161,29 @@
     thead th {
       padding: 10px 16px;
       text-align: left;
-      font-size: 13px;
+      font-size: var(--text-sm);
       font-weight: 500;
+      letter-spacing: 0.025em;
       color: var(--muted);
-      background: #f9fafb;
+      background: var(--bg);
       border-bottom: 1px solid var(--border);
     }
 
     thead th.count-col,
     tbody td.count-col {
       text-align: right;
+      white-space: nowrap;
+    }
+
+    thead th:nth-child(3),
+    tbody td:nth-child(3) {
+      white-space: nowrap;
     }
 
     tbody td {
-      padding: 11px 16px;
+      padding: 10px 16px;
       border-bottom: 1px solid var(--border);
-      font-size: 14px;
+      font-size: var(--text-base);
       vertical-align: middle;
     }
 
@@ -150,7 +192,7 @@
     }
 
     tbody tr:hover {
-      background: #f9fafb;
+      background: var(--bg);
     }
 
     .filename {
@@ -173,8 +215,8 @@
       justify-content: center;
       min-width: 66px;
       padding: 3px 8px;
-      border-radius: 4px;
-      font-size: 12px;
+      border-radius: var(--radius-sm);
+      font-size: var(--text-xs);
       font-weight: 500;
       border: 1px solid transparent;
       white-space: nowrap;
@@ -201,6 +243,7 @@
     .placeholder {
       position: absolute;
       inset: 0;
+      border-radius: var(--radius-lg);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -231,27 +274,31 @@
     }
 
     .placeholder strong {
-      font-size: 14px;
+      font-size: var(--text-base);
       font-weight: 500;
       color: var(--text);
     }
 
+    .hint-mobile {
+      display: none;
+    }
+
     .placeholder span {
-      font-size: 13px;
+      font-size: var(--text-sm);
     }
 
     .status-bar {
       margin-top: 12px;
-      padding: 11px 16px;
+      padding: 10px 16px;
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 8px;
+      border-radius: var(--radius-lg);
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 12px;
       color: var(--muted);
-      font-size: 14px;
+      font-size: var(--text-base);
     }
 
     .total {
@@ -271,6 +318,18 @@
       border: 0;
     }
 
+    button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+      }
+    }
+
     @media (max-width: 760px) {
       .app {
         padding-inline: 14px;
@@ -282,10 +341,6 @@
         align-items: flex-start;
       }
 
-      .toolbar {
-        justify-content: stretch;
-      }
-
       .toolbar button {
         flex: 1;
       }
@@ -294,15 +349,21 @@
       tbody td:nth-child(4) {
         display: none;
       }
+
+      .hint-desktop {
+        display: none;
+      }
+
+      .hint-mobile {
+        display: block;
+      }
     }
   </style>
 </head>
 <body>
   <div class="app">
     <header class="header">
-      <div>
-        <h1>DeltaCount</h1>
-      </div>
+      <h1>DeltaCount</h1>
     </header>
 
     <div class="toolbar">
@@ -312,17 +373,20 @@
 
     <section class="table-shell" id="dropTarget" aria-label="Processed files">
       <input id="fileInput" class="sr-only" type="file" accept=".docx" multiple>
-      <table>
-        <thead>
-          <tr>
-            <th>Filename</th>
-            <th class="count-col">Word count</th>
-            <th>Status</th>
-            <th>Message</th>
-          </tr>
-        </thead>
-        <tbody id="resultsBody"></tbody>
-      </table>
+      <div class="table-scroll">
+        <table>
+          <caption class="sr-only">Processed files</caption>
+          <thead>
+            <tr>
+              <th>Filename</th>
+              <th class="count-col">Word count</th>
+              <th>Status</th>
+              <th>Message</th>
+            </tr>
+          </thead>
+          <tbody id="resultsBody"></tbody>
+        </table>
+      </div>
 
       <div class="placeholder" id="placeholder" tabindex="0" role="button" aria-label="Drop .docx files here or click Browse">
         <div class="placeholder-inner">
@@ -330,18 +394,22 @@
             <path d="M12 16V5m0 0 3.5 3.5M12 5 8.5 8.5"></path>
             <path d="M5 15.5v1.75A1.75 1.75 0 0 0 6.75 19h10.5A1.75 1.75 0 0 0 19 17.25V15.5"></path>
           </svg>
-          <strong>Drop .docx files here or click Browse</strong>
+          <strong class="hint-desktop">Drop .docx files here or click Browse</strong>
+          <strong class="hint-mobile">Tap Browse Files to add .docx files</strong>
           <span>.doc files are not supported. Save these as .docx before importing.</span>
         </div>
       </div>
     </section>
 
     <footer class="status-bar">
-      <div class="total" id="totalLabel">Total billable word count: 0</div>
-      <div id="fileCountLabel">No files processed</div>
+      <div class="total" id="totalLabel" aria-live="polite" aria-atomic="true">Total billable word count: 0</div>
+      <div id="fileCountLabel" aria-live="polite" aria-atomic="true">No files processed</div>
     </footer>
+
+    <div class="sr-only" aria-live="polite" aria-atomic="true" id="announcer"></div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <script>
     const ABBREVIATIONS = new Set([
       "e.g.", "i.e.", "dr.", "mr.", "mrs.", "ms.", "prof.", "sr.", "jr.", "vs.", "etc."
@@ -363,7 +431,8 @@
       placeholder: document.getElementById("placeholder"),
       resultsBody: document.getElementById("resultsBody"),
       totalLabel: document.getElementById("totalLabel"),
-      fileCountLabel: document.getElementById("fileCountLabel")
+      fileCountLabel: document.getElementById("fileCountLabel"),
+      announcer: document.getElementById("announcer")
     };
 
     elements.browseButton.addEventListener("click", () => elements.fileInput.click());
@@ -404,6 +473,9 @@
     });
 
     async function processFiles(files) {
+      elements.browseButton.disabled = true;
+      elements.clearButton.disabled = true;
+
       for (const file of files) {
         const lowerName = file.name.toLowerCase();
 
@@ -440,6 +512,8 @@
         }
       }
 
+      elements.browseButton.disabled = false;
+      elements.clearButton.disabled = false;
       renderSummary();
     }
 
@@ -738,6 +812,12 @@
       state.results.push(result);
       renderRow(result);
       updatePlaceholder();
+
+      const summary = result.status === "success"
+        ? `${result.filename}: ${result.billableWords.toLocaleString()} billable words.`
+        : `${result.filename}: ${result.message}`;
+      elements.announcer.textContent = "";
+      requestAnimationFrame(() => { elements.announcer.textContent = summary; });
     }
 
     function renderRow(result) {
@@ -778,7 +858,9 @@
     }
 
     function updatePlaceholder() {
-      elements.placeholder.hidden = state.results.length > 0;
+      const hasResults = state.results.length > 0;
+      elements.placeholder.hidden = hasResults;
+      elements.clearButton.disabled = !hasResults;
     }
 
     function capitalize(value) {
@@ -800,8 +882,3 @@
   </script>
 </body>
 </html>
-
-
-
-
-
